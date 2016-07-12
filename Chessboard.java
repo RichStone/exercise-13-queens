@@ -38,6 +38,14 @@ public class Chessboard {
 		chessboard[row][column] = 0;
 	}
 	
+	/**
+	 * 
+	 * @param rowCell_1
+	 * @param columnCell_1
+	 * @param rowCell_2
+	 * @param columnCell_2
+	 * @return
+	 */
 	public boolean threat(int rowCell_1, int columnCell_1, int rowCell_2, int columnCell_2) {
 		boolean threatens = false;
 		
@@ -45,9 +53,34 @@ public class Chessboard {
 		if(rowCell_1 == rowCell_2) {
 			threatens = true;
 		}
+		
+		//horizontal threat
 		if(columnCell_1 == columnCell_2) {
 			threatens = true;
 		}
+		
+		//diagonal ascending right
+		try{
+			for(int i = 1; i < rowCell_2; i++) {
+				if(chessboard[rowCell_2 - i][columnCell_2 + i] == 0) {
+					threatens = true;
+				}
+			}
+		}catch(ArrayIndexOutOfBoundsException e) {
+			System.out.println("alles ok rechts");
+		}
+		
+		
+		try{
+			for(int i = 1; i < rowCell_2; i++) {
+				if(chessboard[rowCell_2 - i][columnCell_2 - i] == 0) {
+					threatens = true;
+				}
+			}
+		}catch(ArrayIndexOutOfBoundsException e) {
+			System.out.println("alles ok links");
+		}
+
 		
 		return threatens;
 	}
