@@ -1,9 +1,11 @@
 
 public class Chessboard {
 	private int[][] chessboard;
+	private int boardSize;
 
 	public Chessboard(int rows, int columns) {
 		chessboard = new int[rows][columns];
+		boardSize = chessboard.length;
 	}
 
 	public void initializeBoard() {
@@ -94,99 +96,128 @@ public class Chessboard {
 
 		return false;
 	}
-	
-	//coordinates for last queen for backtracking
+
+	// coordinates for last queen for backtracking
 	int lastQueenRow;
 	int lastQueenColumn;
 
-	public int[][] findSolution(int[][] tempChessboard, int rowStart, int columnStart) {
+	public int[][] findSolution(int[][] tempChessboard, int row, int column) {
 		
-		//little test
-//		if(chessboard[0][1] == 0) {
-//			System.out.println("Letztes Board erstmal");
-//			printBoard();
-//			return chessboard;
-//		}
-		// brauchen einen Solution Count
-		int queensSet = 0;
-
-		// erstmal termination condition
+		boolean boardFinished = row == boardSize - 1 && column == boardSize - 1;
+		
 		if (allSolutionsFound()) {
 			System.out.println("SUPPA!");
 			printBoard();
-			return chessboard;
-		} else {
-			for (int i = rowStart; i < chessboard.length; i++) {
-				for (int j = columnStart; j < chessboard.length; j++) {
-					
-					if(!threat(i, j, chessboard)) {
-						
-						System.out.println("Keine Bedrohung :)");
-						Queen queen = new Queen(i, j);
-						
-						setQueen(queen);
-						
-						queensSet++;
-						
-						findSolution(chessboard, queen.getRow() + 1, 0);
-					}
-					
-					System.out.println("Bedrohung!");
-				}
-			}
+			return tempChessboard;
 		}
-		
-		printBoard();
-		
-		System.out.println("TRY BACKTRACKING");
-		findSolution(deleteLastQueenAndGetNewBoard(), lastQueenRow, lastQueenColumn + 1);
-		
-		System.out.println("VERSAGT");
-		return null;
+		else {
+			//special case
+			if(row == boardSize - 1 && column == boardSize - 1 && chessboard[row][column] == 1) {
+				System.out.println("LAST QUEEN SET BUT NOT ALL SOLUTIONS FOUND");
+				chessboard[row][column] = 0;
+			}
+			
+			if(!threat(row, column, tempChessboard)) {
+				System.out.println("Keine Bedrohung :)");
+				setQueen(row, column);
+				printBoard();
+			}
+			
+			//check fields while board not completely checked
+			if(!boardFinished) {
+				
+				System.out.println("Check das Board");
+				
+				//check next column
+				column++;
+				
+				//increase row when column reached the edge
+				if(column == boardSize) {
+					row++;
+					column = 0;
+				}
+				
+			}
+			//track back when end of board reached
+			else {
+				System.out.println("End of Board reached XX");
+				
+				//assign last pos of queen as actual pos
+				int[] lastPositions = deleteLastQueenAndGetLastPositions(column);
+				row = lastPositions[0];
+				column = lastPositions[1];
+				
+				//now get the actual positions inlusively the Randbehandlung
+				//try one after last queen's pos
+				//check next column
+				column++;
+				
+				//increase row when column reached the edge
+				if(column == boardSize) {
+					row++;
+					column = 0;
+				}
+				if(row >= boardSize) {
+					row = boardSize - 1;
+				}
+				
+			}
+			
+			return findSolution(tempChessboard, row, column);
+		}
 	}
-	
+
 	/**
-	 * find the last queen
-	 * set the field to -1
-	 * save the coordinates in the field variables lastQueenRow and lastQueenColumn
-	 * @return the new chessboard
+	 * find the last queen set the field to -1 save the coordinates in 
+	 * an array -> row at position [0] -> column at position [1]
+	 * @return array with the coordinates
 	 */
-	public int[][] deleteLastQueenAndGetNewBoard() {
+	public int[] deleteLastQueenAndGetLastPositions(int column) {
+		int[] lastPositions = new int [2];
 		System.out.println("BACKTRACKING STARTED");
-		for(int i = chessboard.length - 1; i >= 0; i--) {
-			System.out.println("Row checked");
-			for(int j = chessboard.length - 1; j >= 0 ; j--) {
-				if(chessboard[i][j] == 0) {
-					System.out.println("LAST QUEEN FOUND!");
+		for (int i = boardSize - 1; i >= 0; i--) {
+			for (int j = boardSize - 1; j >= 0; j--) {
+				if (chessboard[i][j] == 0) {
+					System.out.println("LAST QUEEN FOUND AT " + i + " and " + j);
+					
+					//delete the queen
 					chessboard[i][j] = -1;
-					lastQueenColumn = j;
-					lastQueenRow = i;
+					
+					//save the row
+					lastPositions[0] = i;
+					
+					//save the column
+					lastPositions[1] = j;
+					
 					printBoard();
-					return chessboard;
+					
+					return lastPositions;
 				}
 				System.out.println("Column checked");
 			}
 		}
 		
+		System.out.println("DELETE QUEENS METHDO VERSATT");
 		return null;
 	}
-	
+
 	public boolean allSolutionsFound() {
+		
 		int amountsOfQueens = 0;
-		for(int i = 0; i < chessboard.length; i++) {
-			for(int j = 0; j < chessboard.length; j++) {
-				if(chessboard[i][j] == 0) {
+		for (int i = 0; i < boardSize; i++) {
+			for (int j = 0; j < boardSize; j++) {
+				if (chessboard[i][j] == 0) {
 					amountsOfQueens++;
 				}
-				if(amountsOfQueens == chessboard.length) {
+				if (amountsOfQueens == 8) {
 					return true;
 				}
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public void setQueen(Queen queen) {
 		chessboard[queen.getRow()][queen.getColumn()] = 0;
 	}
