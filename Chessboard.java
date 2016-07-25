@@ -111,11 +111,6 @@ public class Chessboard {
 			return tempChessboard;
 		}
 		else {
-			//special case
-			if(row == boardSize - 1 && column == boardSize - 1 && chessboard[row][column] == 1) {
-				System.out.println("LAST QUEEN SET BUT NOT ALL SOLUTIONS FOUND");
-				chessboard[row][column] = 0;
-			}
 			
 			if(!threat(row, column, tempChessboard)) {
 				System.out.println("Keine Bedrohung :)");
@@ -140,6 +135,12 @@ public class Chessboard {
 			}
 			//track back when end of board reached
 			else {
+				//special case
+				if(row == boardSize - 1 && column == boardSize - 1 && chessboard[row][column] == 0) {
+					System.out.println("LAST QUEEN SET BUT NOT ALL SOLUTIONS FOUND");
+					chessboard[row][column] = -1;
+				}
+				
 				System.out.println("End of Board reached XX");
 				
 				//assign last pos of queen as actual pos
@@ -203,13 +204,13 @@ public class Chessboard {
 
 	public boolean allSolutionsFound() {
 		
-		int amountsOfQueens = 0;
+		int amountOfQueens = 0;
 		for (int i = 0; i < boardSize; i++) {
 			for (int j = 0; j < boardSize; j++) {
 				if (chessboard[i][j] == 0) {
-					amountsOfQueens++;
+					amountOfQueens++;
 				}
-				if (amountsOfQueens == 8) {
+				if (amountOfQueens == 8) {
 					return true;
 				}
 			}
